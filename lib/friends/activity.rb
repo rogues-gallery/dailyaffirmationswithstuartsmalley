@@ -1,6 +1,6 @@
 # Activity represents an activity you've done with one or more Friends.
 
-require "memoist"
+require "date"
 require "paint"
 
 require "friends/serializable"
@@ -8,13 +8,17 @@ require "friends/serializable"
 module Friends
   class Activity
     extend Serializable
-    extend Memoist
 
     SERIALIZATION_PREFIX = "- "
 
     # @return [Regexp] the regex for capturing groups in deserialization
     def self.deserialization_regex
-      /(#{SERIALIZATION_PREFIX})?((?<date_s>\d{4}-\d\d-\d\d)(:\s)?)?(?<description>.+)?/
+      /(#{SERIALIZATION_PREFIX})?((\d{4}-\d\d-\d\d)(:\s)?)?(.+)?/
+    end
+
+    def self.deserialize(str)
+      match = str.to_s.match(deserialization_regex)
+      new(date_s: match[3] || Date.today.to_s, description: match[5])
     end
 
     # @return [Regexp] the string of what we expected during deserialization
@@ -71,7 +75,7 @@ module Friends
       # Ruby hashes are ordered).
       regex_map = Hash.new { |h, k| h[k] = [] }
       while !friend_regexes.empty?
-        friend_regexes.each do |friend, regex_list|
+        friend_regexes.dup.each do |friend, regex_list|
           regex_map[regex_list.shift] << friend
           friend_regexes.delete(friend) if regex_list.empty?
         end
@@ -125,7 +129,7 @@ module Friends
 
       # Lastly, we remove any backslashes, as these are used to escape friends'
       # names that we don't want to match.
-      @description.gsub!("\\", "")
+      @description = @description.gsub("\\", "")
     end
 
     # @param friend [Friend] the friend to test
@@ -137,9 +141,8 @@ module Friends
     # Find the names of all friends in this description.
     # @return [Array] list of all friend names in the description
     def friend_names
-      description.scan(/(?<=\*\*)\w[^\*]*(?=\*\*)/).uniq
+      @_friend_names ||= description.scan(/(\*\*)\w[^\*]*(?=\*\*)/).uniq
     end
-    memoize :friend_names
 
     private
 

@@ -11,7 +11,12 @@ module Friends
 
     # @return [Regexp] the regex for capturing groups in deserialization
     def self.deserialization_regex
-      /(#{SERIALIZATION_PREFIX})?(?<name>[^\(]+)(\((?<nickname_str>#{NICKNAME_PREFIX}.+)\))?/
+      /(#{SERIALIZATION_PREFIX})?([^\(]+)(\((#{NICKNAME_PREFIX}.+)\))?/
+    end
+
+    def self.deserialize(str)
+      match = str.to_s.match(deserialization_regex)
+      new(name: match[2], nickname_str: match[4])
     end
 
     # @return [Regexp] the string of what we expected during deserialization
@@ -89,15 +94,15 @@ module Friends
 
       # We don't want to match names that are "escaped" with a leading
       # backslash.
-      no_leading_backslash = "(?<!\\\\)"
+      no_leading_backslash = "" # "(?<!\\\\)"
 
       # We don't want to match names that are directly touching double asterisks
       # as these are treated as sacred by our program.
-      no_leading_asterisks = "(?<!\\*\\*)"
+      no_leading_asterisks = "" # "(?<!\\*\\*)"
       no_ending_asterisks = "(?!\\*\\*)"
 
       # We don't want to match names that are part of other words.
-      no_leading_alphabeticals = "(?<![A-z])"
+      no_leading_alphabeticals = "" # "(?<![A-z])"
       no_ending_alphabeticals = "(?![A-z])"
 
       # Create the list of regexes and return it.

@@ -311,9 +311,9 @@ module Friends
       line_num = 0
 
       # Loop through all lines in the file and process them.
-      File.foreach(@filename) do |line|
+      File.read(@filename).split("\n").each do |line|
         line_num += 1
-        line.chomp! # Remove trailing newline from each line.
+        line = line.chomp # Remove trailing newline from each line.
 
         case state
         when :initial
