@@ -6,16 +6,16 @@ clean_describe "list favorite friends" do
   subject { run_cmd("list favorite friends") }
 
   describe "when file does not exist" do
-    it "prints a no-data message" do
-      stdout_only "Your favorite friends:"
+    it "prints nothing" do
+      stdout_only ""
     end
   end
 
   describe "when file is empty" do
     let(:content) { "" }
 
-    it "prints a no-data message" do
-      stdout_only "Your favorite friends:"
+    it "prints nothing" do
+      stdout_only ""
     end
   end
 
@@ -38,40 +38,10 @@ FILE
 
     it "lists friends in order of decreasing activity" do
       stdout_only <<-OUTPUT
-Your favorite friends:
 1. Grace Hopper             (3 activities)
 2. George Washington Carver (2)
 3. Marie Curie              (1)
       OUTPUT
-    end
-
-    describe "--limit" do
-      subject { run_cmd("list favorite friends --limit #{limit}") }
-
-      describe "when limit is less than 1" do
-        let(:limit) { 0 }
-        it "prints an error message" do
-          stderr_only "Error: Favorites limit must be positive"
-        end
-      end
-
-      describe "when limit is 1" do
-        let(:limit) { 1 }
-        it "outputs as a best friend" do
-          stdout_only "Your best friend is Grace Hopper (3 activities)"
-        end
-      end
-
-      describe "when limit is greater than 1" do
-        let(:limit) { 2 }
-        it "limits output to the number specified" do
-          stdout_only <<-OUTPUT
-Your favorite friends:
-1. Grace Hopper             (3 activities)
-2. George Washington Carver (2)
-          OUTPUT
-        end
-      end
     end
   end
 end

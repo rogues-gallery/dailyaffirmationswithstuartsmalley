@@ -327,57 +327,57 @@ Graphs (in color!) your activities over time:
 
 ```bash
 $ friends graph
-Nov 2014 |███
-Dec 2014 |██
-Jan 2015 |███████
 Feb 2015 |█████
+Jan 2015 |███████
+Dec 2014 |██
+Nov 2014 |███
 ```
 
 Or graph only activities with a certain friend:
 
 ```bash
 $ friends graph --with George
-Nov 2014 |█
-Dec 2014 |
-Jan 2015 |█████
 Feb 2015 |███
+Jan 2015 |█████
+Dec 2014 |
+Nov 2014 |█
 ```
 
 Or graph only activities with a certain tag:
 
 ```bash
 $ friends graph --tagged food
-Nov 2014 |█
-Dec 2014 |
-Jan 2015 |
 Feb 2015 |███
+Jan 2015 |
+Dec 2014 |
+Nov 2014 |█
 ```
 
 Or graph only activities in a certain location:
 
 ```bash
 $ friends graph --in Paris
-Nov 2014 |█
-Dec 2014 |
-Jan 2015 |
 Feb 2015 |█
+Jan 2015 |
+Dec 2014 |
+Nov 2014 |█
 ```
 
 Or graph only activities on or after a certain date:
 
 ```bash
 $ friends graph --since 'January 1st 2015'
-Jan 2015 |███████
 Feb 2015 |█████
+Jan 2015 |███████
 ```
 
 Or graph only activities before or on a certain date:
 
 ```bash
 $ friends graph --until 'January 1st 2015'
-Nov 2014 |███
-Dec 2014 |██
 Jan 2015 |███████
+Dec 2014 |██
+Nov 2014 |███
 ```
 
 And you can use multiple of these flags together:
@@ -427,15 +427,7 @@ $ friends list activities
 2014-11-15: Talked to George Washington Carver on the phone for an hour.
 ```
 
-You can adjust how many activities are shown:
-
-```bash
-$ friends list activities --limit 2
-2015-01-04: Got lunch with Grace Hopper and George Washington Carver. @food
-2014-12-31: Celebrated the new year with Marie Curie in New York City. @partying
-```
-
-Or only list the activities you did with a certain friend:
+You can list the activities you did with a certain friend:
 
 ```bash
 $ friends list activities --with George
@@ -484,19 +476,9 @@ Lists your "favorite" friends (by total number of activities):
 
 ```bash
 $ friends list favorite friends
-Your favorite friends:
 1. George Washington Carver (2 activities)
 2. Grace Hopper             (1)
 3. Marie Curie              (1)
-```
-
-You can specify a number of favorites to show:
-
-```bash
-$ friends list favorite friends --limit 2
-Your favorite friends:
-1. George Washington Carver (2 activities)
-2. Grace Hopper             (1)
 ```
 
 #### `list favorite locations`
@@ -505,19 +487,9 @@ Lists your "favorite" locations (by total number of activities):
 
 ```bash
 $ friends list favorite locations
-Your favorite locations:
 1. Atlantis (2 activities)
 2. Paris    (1)
 3. London   (1)
-```
-
-You can specify a number of favorites to show:
-
-```bash
-$ friends list favorite locations --limit 2
-Your favorite locations:
-1. Atlantis (2 activities)
-2. Paris    (1)
 ```
 
 #### `list friends`

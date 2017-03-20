@@ -5,6 +5,7 @@
 # the command-line script explicitly.
 
 require "set"
+require "tty-pager"
 
 require "friends/activity"
 require "friends/friend"
@@ -190,7 +191,6 @@ module Friends
     #   "@tag"), or nil for unfiltered
     # @param verbose [Boolean] true iff we should output friend names with
     #   nicknames, locations, and tags; false for names only
-    # @return [Array] a list of all friend names
     def list_friends(location_name:, tagged:, verbose:)
       fs = @friends
 
@@ -203,28 +203,34 @@ module Friends
       # Filter by tag if one is passed.
       fs = fs.select { |friend| friend.tags.include? tagged } if tagged
 
-      verbose ? fs.map(&:to_s) : fs.map(&:name)
+      page_array(verbose ? fs.map(&:to_s) : fs.map(&:name))
     end
 
     # List your favorite friends.
-    # @param limit [Integer] the number of favorite friends to return
-    # @return [Array] a list of the favorite friends' names and activity
-    #   counts
-    def list_favorite_friends(limit:)
-      list_favorite_things(:friend, limit: limit)
+    def list_favorite_friends
+      favorites = favorite_things(:friend)
+      num_str_size = favorites.size.to_s.size + 1
+
+      output = favorites.map.with_index(1) do |name, rank|
+        "#{"#{rank}.".ljust(num_str_size)} #{name}"
+      end
+
+      page_array(output)
     end
 
     # List your favorite friends.
-    # @param limit [Integer] the number of favorite locations to return
-    # @return [Array] a list of the favorite locations' names and activity
-    #   counts
-    def list_favorite_locations(limit:)
-      list_favorite_things(:location, limit: limit)
+    def list_favorite_locations
+      favorites = favorite_things(:location)
+      num_str_size = favorites.size.to_s.size + 1
+
+      output = favorites.map.with_index(1) do |name, rank|
+        "#{"#{rank}.".ljust(num_str_size)} #{name}"
+      end
+
+      page_array(output)
     end
 
     # List all activity details.
-    # @param limit [Integer] the number of activities to return, or nil for no
-    #   limit
     # @param with [String] the name of a friend to filter by, or nil for
     #   unfiltered
     # @param location_name [String] the name of a location to filter by, or nil
@@ -233,13 +239,9 @@ module Friends
     #   "@tag"), or nil for unfiltered
     # @param since_date [Date] a date on or after which to find activities, or nil for unfiltered
     # @param until_date [Date] a date before or on which to find activities, or nil for unfiltered
-    # @return [Array] a list of all activity text values
-    # @raise [ArgumentError] if limit is present but limit < 1
     # @raise [FriendsError] if friend, location or tag cannot be found or
     #   is ambiguous
-    def list_activities(limit:, with:, location_name:, tagged:, since_date:, until_date:)
-      raise ArgumentError, "Limit must be positive" if limit && limit < 1
-
+    def list_activities(with:, location_name:, tagged:, since_date:, until_date:)
       acts = filtered_activities(
         with: with,
         location_name: location_name,
@@ -248,22 +250,17 @@ module Friends
         until_date: until_date
       )
 
-      # If we need to, trim the list.
-      acts = acts.take(limit) unless limit.nil?
-
-      acts.map(&:to_s)
+      page_array(acts.map(&:to_s))
     end
 
     # List all location names in the friends file.
-    # @return [Array] a list of all location names
     def list_locations
-      @locations.map(&:name)
+      page_array(@locations.map(&:name))
     end
 
     # @param from [String] one of: ["activities", "friends", nil]
     #   If not nil, limits the tags returned to only those from either
     #   activities or friends.
-    # @return [Array] a sorted list of all tags in activity descriptions
     def list_tags(from:)
       output = Set.new
 
@@ -279,7 +276,7 @@ module Friends
         end
       end
 
-      output.sort_by(&:downcase)
+      page_array(output.sort_by(&:downcase))
     end
 
     # Find data points for graphing activities over time.
@@ -302,7 +299,6 @@ module Friends
     #   "@tag"), or nil for unfiltered
     # @param since_date [Date] a date on or after which to find activities, or nil for unfiltered
     # @param until_date [Date] a date before or on which to find activities, or nil for unfiltered
-    # @return [Hash{String => Integer}]
     # @raise [FriendsError] if friend, location or tag cannot be found or
     #   is ambiguous
     def graph(with:, location_name:, tagged:, since_date:, until_date:)
@@ -314,7 +310,25 @@ module Friends
         until_date: until_date
       )
 
-      Graph.new(activities: activities_to_graph).to_h
+      data = Graph.new(activities: activities_to_graph).to_h
+
+      # This math is taken from Minitest's Pride plugin (the PrideLOL class).
+      pi_3 = Math::PI / 3
+
+      colors = (0...(6 * 7)).map do |n|
+        n *= 1.0 / 6
+        r  = (3 * Math.sin(n) + 3).to_i
+        g  = (3 * Math.sin(n + 2 * pi_3) + 3).to_i
+        b  = (3 * Math.sin(n + 4 * pi_3) + 3).to_i
+
+        [r, g, b].map { |c| c * 51 }
+      end
+
+      output = data.reverse_each.map do |month, count|
+        "#{month} |" + colors.take(count).map { |rgb| Paint["█", rgb] }.join
+      end
+
+      page_array(output)
     end
 
     # Suggest friends to do something with.
@@ -488,21 +502,17 @@ module Friends
     end
 
     # @param type [Symbol] one of: [:friend, :location]
-    # @param limit [Integer] the number of favorite things to return
     # @return [Array] a list of the favorite things' names and activity counts
     # @raise [ArgumentError] if type is not one of: [:friend, :location]
-    # @raise [ArgumentError] if limit is < 1
-    def list_favorite_things(type, limit:)
+    def favorite_things(type)
       unless [:friend, :location].include? type
         raise ArgumentError, "Type must be either :friend or :location"
       end
 
-      raise ArgumentError, "Favorites limit must be positive" if limit < 1
-
       # Sort the results, with the most favorite thing first.
       results = instance_variable_get("@#{type}s").sort_by do |thing|
         -thing.n_activities
-      end.take(limit) # Trim the list.
+      end
 
       max_str_size = results.map(&:name).map(&:size).max
       results.map.with_index(0) do |thing, index|
@@ -646,6 +656,12 @@ module Friends
               "More than one #{type} found for \"#{text}\": "\
                 "#{things.map(&:name).join(', ')}"
       end
+    end
+
+    # Prints the given array of lines, using TTY:Pager to page the output.
+    # @param arr [Array<String>] an array of lines to print
+    def page_array(arr)
+      TTY::Pager.new.page(arr.join("\n") + "\n")
     end
 
     # Raise an error that a line in the friends file is malformed.
