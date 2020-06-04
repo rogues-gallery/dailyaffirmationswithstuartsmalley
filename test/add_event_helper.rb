@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def date_parsing_specs(test_stdout: true)
   describe "date parsing" do
     let(:description) { "Test." }
@@ -56,7 +58,7 @@ def description_parsing_specs(test_stdout: true)
         let(:description) { "  " }
 
         it "prints an error message" do
-          subject[:stderr].must_equal(
+          value(subject[:stderr]).must_equal(
             ensure_trailing_newline_unless_empty("Error: Blank #{event} not added")
           )
         end
@@ -115,6 +117,60 @@ def description_parsing_specs(test_stdout: true)
         it { line_added "- #{date}: Met **Grace Hopper** at 12." }
         if test_stdout
           it { stdout_only "#{capitalized_event} added: \"#{date}: Met Grace Hopper at 12.\"" }
+        end
+      end
+
+      describe "when followed by a period and a comma" do
+        let(:description) { "Met grace h., and others, at 12." }
+
+        it { line_added "- #{date}: Met **Grace Hopper**, and others, at 12." }
+        if test_stdout
+          it { stdout_only "#{capitalized_event} added: \"#{date}: Met Grace Hopper, and others, at 12.\"" } # rubocop:disable Layout/LineLength
+        end
+      end
+
+      describe "when followed by a period, a comma, and a proper noun" do
+        let(:description) { "Met grace h., King James, and others at 12." }
+
+        it { line_added "- #{date}: Met **Grace Hopper**, King James, and others at 12." }
+        if test_stdout
+          it { stdout_only "#{capitalized_event} added: \"#{date}: Met Grace Hopper, King James, and others at 12.\"" } # rubocop:disable Layout/LineLength
+        end
+      end
+
+      describe "when followed by a period and a complex series of sentence-ending punctuation" do
+        let(:description) { "Met someone—grace h.?! At 12." }
+
+        it { line_added "- #{date}: Met someone—**Grace Hopper**?! At 12." }
+        if test_stdout
+          it { stdout_only "#{capitalized_event} added: \"#{date}: Met someone—Grace Hopper?! At 12.\"" } # rubocop:disable Layout/LineLength
+        end
+      end
+
+      describe "when followed by a period and a complex series of mid-sentence punctuation" do
+        let(:description) { "Met someone {grace h.}—at 12." }
+
+        it { line_added "- #{date}: Met someone {**Grace Hopper**}—at 12." }
+        if test_stdout
+          it { stdout_only "#{capitalized_event} added: \"#{date}: Met someone {Grace Hopper}—at 12.\"" } # rubocop:disable Layout/LineLength
+        end
+      end
+
+      describe "when followed by a period as part of a sentence-ending ellipsis" do
+        let(:description) { "Met grace h... Great!" }
+
+        it { line_added "- #{date}: Met **Grace Hopper**... Great!" }
+        if test_stdout
+          it { stdout_only "#{capitalized_event} added: \"#{date}: Met Grace Hopper... Great!\"" }
+        end
+      end
+
+      describe "when followed by a period as part of a mid-sentence ellipsis" do
+        let(:description) { "Met grace h... at 12." }
+
+        it { line_added "- #{date}: Met **Grace Hopper**... at 12." }
+        if test_stdout
+          it { stdout_only "#{capitalized_event} added: \"#{date}: Met Grace Hopper... at 12.\"" }
         end
       end
     end
@@ -449,15 +505,15 @@ FILE
     end
 
     describe "when description contains both names and locations" do
-      let(:description) { "Grace and I went to Atlantis and then Paris for lunch with George." }
+      let(:description) { "Grace and I visited Atlantis and then Paris for lunch with George." }
 
       it do
-        line_added "- #{date}: **Grace Hopper** and I went to _Atlantis_ and then _Paris_ for "\
+        line_added "- #{date}: **Grace Hopper** and I visited _Atlantis_ and then _Paris_ for "\
                    "lunch with **George Washington Carver**."
       end
       if test_stdout
         it do
-          stdout_only "#{capitalized_event} added: \"#{date}: Grace Hopper and I went to "\
+          stdout_only "#{capitalized_event} added: \"#{date}: Grace Hopper and I visited "\
                       "Atlantis and then Paris for lunch with George Washington Carver.\""
         end
       end

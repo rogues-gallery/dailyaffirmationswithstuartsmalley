@@ -36,6 +36,37 @@ clean_describe "edit" do
     end
   end
 
+  describe "when editor is multiple words" do
+    let(:editor) { "'cat -u'" }
+
+    describe "when output is quieted" do
+      let(:quiet) { "--quiet" }
+
+      it 'opens the file in the "editor"' do
+        stdout_only content
+      end
+
+      it "cleans the file" do
+        file_equals CONTENT # File is cleaned (no longer scrambled).
+      end
+    end
+
+    describe "when output is not quieted" do
+      let(:quiet) { nil }
+
+      # Since our "editor" is just `cat -u`, our STDOUT output will include both the opening
+      # message and the contents of the file.
+      it 'prints a message and opens the file in the "editor"' do
+        stdout_only "Opening \"#{filename}\" with \"#{editor.tr("'", '')}\""\
+                    "\n#{content}File cleaned: \"#{filename}\""
+      end
+
+      it "cleans the file" do
+        file_equals CONTENT # File is cleaned (no longer scrambled).
+      end
+    end
+  end
+
   describe "when editor does not exit successfully" do
     let(:editor) { "'exit 1 #'" }
 
@@ -78,7 +109,7 @@ Not cleaning file: "#{filename}" ("exit 1 #" did not exit successfully)
       <<-EXPECTED_CONTENT
 ### Activities:
 - 2018-02-06: @science:indoors:agronomy-with-hydroponics: **Norman Borlaug** and **George Washington Carver** scored a tour of _Atlantis_' hydroponics gardens through wetplants@example.org and they took me along.
-- 2015-11-01: **Grace Hopper** and I went to _Marie's Diner_. George had to cancel at the last minute. @food
+- 2015-11-01: **Grace Hopper** and I went to _Martha's Vineyard_. George had to cancel at the last minute.
 - 2015-01-04: Got lunch with **Grace Hopper** and **George Washington Carver**. @food
 - 2014-12-31: Celebrated the new year in _Paris_ with **Marie Curie**. @partying
 - 2014-12-16: Okay, yep, I definitely just saw **Bigfoot** in the _Mysterious Mountains_!
@@ -101,7 +132,7 @@ Not cleaning file: "#{filename}" ("exit 1 #" did not exit successfully)
 
 ### Locations:
 - Atlantis
-- Marie's Diner
+- Martha's Vineyard
 - Mysterious Mountains
 - Paris
       EXPECTED_CONTENT

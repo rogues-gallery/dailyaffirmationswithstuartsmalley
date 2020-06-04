@@ -5,19 +5,9 @@
 [![Inline docs](http://inch-ci.org/github/JacobEvelyn/friends.png)](http://inch-ci.org/github/JacobEvelyn/friends)
 [![Gem](https://img.shields.io/gem/dt/friends.svg)](https://rubygems.org/gems/friends)
 
-`friends` is a volunteer project. If you find it useful, please consider
-making a small donation (🙏) to show you appreciate its continued development.
-
-👇 Donate with these buttons! 👇
-
-[![Backers on Open Collective](<https://opencollective.com/friends/backers_(Open_Collective)/badge.svg>)](#backers) [![Sponsors on Open Collective](<https://opencollective.com/friends/sponsors_(Open_Collective)/badge.svg>)](#sponsors)
-[![Support via Patreon](https://img.shields.io/badge/support-Patreon-green.svg)](https://www.patreon.com/jacobevelyn)
-[![Donate via Liberapay](https://img.shields.io/badge/donate-Liberapay-green.svg)](https://liberapay.com/jacobevelyn/donate)
-[![Donate via PayPal](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=jacobevelyn%40gmail%2ecom&lc=US&item_name=Development%20of%20JacobEvelyn%2ffriends%20%28GitHub%20repository%29&no_note=0¤cy_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest)
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=jacobevelyn&url=https://github.com/JacobEvelyn/friends&title=friends&tags=github&category=software)
-[![Donate bitcoin](https://img.shields.io/badge/donate-Bitcoin-green.svg)](https://nrobinson2000.github.io/donate-bitcoin?address=1CFu6gWpmS89EnitPPdYssZhFMRWx5qhW4&amount=10&name=support-friends-development)
-
-👆 Donate with these buttons! 👆
+`friends` is a volunteer project. If you find it valuable, please consider
+making a small donation (🙏) with the **Sponsor** button at the top of this page
+to show you appreciate its continued development.
 
 # `friends`
 
@@ -47,6 +37,7 @@ lots of help), and give feedback! This project is
       - [`add tag`](#add-tag)
       - [`add location`](#add-location)
       - [`add nickname`](#add-nickname)
+      - [Adding a default location](#adding-a-default-location)
     - [`clean`](#clean)
     - [`graph`](#graph)
     - [`help`](#help)
@@ -141,7 +132,7 @@ FRIENDS_PAGER="less -RF"
 - **Friends**: The people you do _activities_ with. Each friend has a name and,
   optionally, one or several nicknames. (Examples: `John`, `Grace Hopper`)
 - **Locations**: The places in which _activities_ happen. (Examples: `Paris`,
-  `Marie's Diner`)
+  `Martha's Vineyard`)
 - **Tags**: A way to categorize your _activities_ with tags of your
   choosing. Tags may contain colons and hyphens inside them. (Examples: `@exercise:running`, `@school`, `@science:indoors:agronomy-with-hydroponics`)
 - **Notes**: Any additional information you want to record about a _friend_
@@ -155,7 +146,7 @@ The `friends.md` Markdown file that stores all of your data contains:
 ### Locations:
 
 - Atlantis
-- Marie's Diner
+- Martha's Vineyard
 - Paris
 ```
 
@@ -174,7 +165,7 @@ The `friends.md` Markdown file that stores all of your data contains:
 ```markdown
 ### Activities:
 
-- 2018-11-01: **Grace Hopper** and I went to _Marie's Diner_. George had to cancel at the last minute.
+- 2018-11-01: **Grace Hopper** and I went to _Martha's Vineyard_. George had to cancel at the last minute.
 - 2018-01-04: Got lunch with **Grace Hopper** and **George Washington Carver**.
 - 2017-12-31: Celebrated the new year in _Paris_ with **Marie Curie**.
 - 2017-11-15: Talked to **George Washington Carver** on the phone for an hour.
@@ -339,8 +330,8 @@ $ friends add activity last Monday
 You can escape the names of friends you don't want `friends` to match with a backslash:
 
 ```bash
-$ friends add activity "2018-11-01: Grace and I went to \Marie's Diner. \George had to cancel at the last minute."
-Activity added: "2018-11-01: Grace Hopper and I went to Marie's Diner. George had to cancel at the last minute."
+$ friends add activity "2018-11-01: Grace and I went to \Martha's Vineyard. \George had to cancel at the last minute."
+Activity added: "2018-11-01: Grace Hopper and I went to Martha's Vineyard. George had to cancel at the last minute."
 ```
 
 And if an activity contains friends or locations you haven't yet added, you can simply
@@ -418,6 +409,27 @@ $ friends add nickname "Grace Hopper" "The Admiral"
 Nickname added: "Grace Hopper (a.k.a. The Admiral)
 $ friends add nickname "Grace Hopper" "Amazing Grace"
 Nickname added: "Grace Hopper (a.k.a. The Admiral a.k.a. Amazing Grace)"
+```
+
+#### Setting a default location
+
+When an activity includes the phrase to \_LOCATION\_ (e.g., Took a plane to \_Paris\_), all future activities that have no explicit location will be associated with that location:
+
+```bash
+$ friends add activity Took a plane to Paris
+Activity added: "2020-01-04: Took a plane to Paris"
+Default location set to: "Paris"
+$ friends add activity Ate lunch at a charming café
+Activity added: "2020-01-04: Ate lunch at a charming café"
+$ friends add activity Left the city to go to Chamonix
+Activity added: "2020-01-04: Left the city to go to Chamonix"
+Default location set to: "Chamonix"
+```
+
+```bash
+$ friends list activities --in Paris
+2019-01-04: Ate lunch at a charming café
+2019-01-04: Took a plane to Paris
 ```
 
 #### `clean`
@@ -951,16 +963,7 @@ A big big thanks to all of this project's lovely
 
 <a href="https://github.com/JacobEvelyn/friends/graphs/contributors"><img src="https://opencollective.com/friends/contributors.svg?width=890" /></a>
 
-Another way to contribute is to make a donation with any of these buttons:
-
-[![Backers on Open Collective](<https://opencollective.com/friends/backers_(Open_Collective)/badge.svg>)](https://opencollective.com/friends#backer) [![Sponsors on Open Collective](<https://opencollective.com/friends/sponsors_(Open_Collective)/badge.svg>)](https://opencollective.com/friends#sponsor)
-[![Support via Patreon](https://img.shields.io/badge/support-Patreon-green.svg)](https://www.patreon.com/jacobevelyn)
-[![Donate via Liberapay](https://img.shields.io/badge/donate-Liberapay-green.svg)](https://liberapay.com/jacobevelyn/donate)
-[![Donate via PayPal](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=jacobevelyn%40gmail%2ecom&lc=US&item_name=Development%20of%20JacobEvelyn%2ffriends%20%28GitHub%20repository%29&no_note=0¤cy_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest)
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=jacobevelyn&url=https://github.com/JacobEvelyn/friends&title=friends&tags=github&category=software)
-[![Donate bitcoin](https://img.shields.io/badge/donate-Bitcoin-green.svg)](https://nrobinson2000.github.io/donate-bitcoin?address=1CFu6gWpmS89EnitPPdYssZhFMRWx5qhW4&amount=10&name=support-friends-development)
-
-👆 Donate with these buttons right here! 👆
+Another way to contribute is to make a donation with the **Sponsor** button at the top of this page!
 
 ### Backers
 
